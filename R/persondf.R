@@ -16,3 +16,15 @@ persondf <- function(id, dates, ...) {
   mydf$days <- unlist(lapply(1:length(lengths), function(i) rep(dates[i], lengths[i])))
   return(mydf)
 }
+
+#' Plot person
+#'
+#' Plots the person by day
+#' @param persondf Person data frame
+#' @export persondf.plot
+#' @examples
+#' persondf.plot()
+persondf.plot <- function(persondf){
+  require(lattice)
+  xyplot(persondf$freq~persondf$mz|sapply(persondf$days, function(x)paste("Day ", x)), xlab="m/z", ylab="Frequency", main=persondf$id[1])
+}

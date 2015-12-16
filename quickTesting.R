@@ -1,0 +1,6 @@
+setwd("~/Research/clustspec")
+document()
+install(".")
+library(clustspec)
+library(lattice)
+persondf.plot(samea)
