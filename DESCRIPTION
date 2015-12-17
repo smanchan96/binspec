@@ -4,7 +4,7 @@ Version: 0.0.0.9000
 Authors@R: person("Sameer", "Manchanda", email = "smanchan@purdue.edu", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 Depends:
-    R (>= 3.2.3)
+    R (>= 3.1.1)
 License: GNU General Public Licence
 LazyData: true
 RoxygenNote: 5.0.1
