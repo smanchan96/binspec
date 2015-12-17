@@ -4,10 +4,12 @@
 \alias{persondf.mean}
 \title{Mean frequencies parameters}
 \usage{
-persondf.mean(...)
+persondf.mean(ids, bigdf)
 }
 \arguments{
-\item{...}{Each parameter should be a persondf object}
+\item{ids}{Identities to be combined}
+
+\item{bigdf}{Data frame of rbinded persondfs}
 }
 \description{
 Mean frequencies parameters

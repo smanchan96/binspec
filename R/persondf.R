@@ -83,9 +83,11 @@ minMaxByDay <- function(...) {
 
 #' Mean frequencies parameters
 #'
-#' @param ... Each parameter should be a persondf object
+#' @param ids Identities to be combined
+#' @param bigdf Data frame of rbinded persondfs
 #' @export persondf.mean
 #' @examples
 #' persondf.mean()
-persondf.mean <- function(...) {
+persondf.mean <- function(ids, bigdf) {
+  mydf <- bigdf[bigdf$ids%in%ids,]
 }
