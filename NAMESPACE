@@ -3,5 +3,6 @@
 export(dfmerger)
 export(minMaxByDay)
 export(persondf)
+export(persondf.mean)
 export(persondf.plot)
 export(reduceAndConcat)

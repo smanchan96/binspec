@@ -44,6 +44,7 @@ reduceAndConcat <- function(...) {
   for (i in 1:nrow(mymatrix)) {
     mymatrix[i,] <<- dfmerger(mydf, list(...)[[i]])
   }
+  rownames(mymatrix) <<- as.vector(unlist(lapply(list(...), function(x) x$ids[1])))
   mymatrix
 }
 
@@ -69,7 +70,7 @@ dfmerger <- function(filldf, srcdf) {
 #' Returns the min and max of each day
 #'
 #' Reduces each persons m/z, frequencies, and days to just frequencies
-#' @param ... Each arameter should be a person df
+#' @param ... Each parameter should be a person df
 #' @export minMaxByDay
 #' @examples
 #' minMaxByDay()
@@ -78,4 +79,13 @@ minMaxByDay <- function(...) {
   mins <- sapply(myDays, function(x)min(unlist(lapply(list(...), function(y)min(y$freq[y$days==x])))))
   maxs <- sapply(myDays, function(x)max(unlist(lapply(list(...), function(y)max(y$freq[y$days==x])))))
   data.frame("min"=mins, "max"=maxs)
+}
+
+#' Mean frequencies parameters
+#'
+#' @param ... Each parameter should be a persondf object
+#' @export persondf.mean
+#' @examples
+#' persondf.mean()
+persondf.mean <- function(...) {
 }

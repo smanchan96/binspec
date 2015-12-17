@@ -7,7 +7,7 @@
 minMaxByDay(...)
 }
 \arguments{
-\item{...}{Each arameter should be a person df}
+\item{...}{Each parameter should be a person df}
 }
 \description{
 Reduces each persons m/z, frequencies, and days to just frequencies
