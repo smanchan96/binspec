@@ -22,3 +22,17 @@ getPrComps <- function(spectrums) {
 	return(result$x[,1:totake])
 }
 
+#' kmeansPCA
+#'
+#' Run getPrComps and k-means, using the k resulting in best CH value
+#' @param spectrums nxm matrix representing frequencies for n individuals over m integer m/z values.
+#' @export kmeansPCA
+#' @examples
+#' kmeansPCA()
+kmeansPCA <- function(spectrums) {
+	require(vegan)
+	f <- getPrComps(spectrums)
+	fit <- cascadeKM(f, 2, 6)
+	k <- which.max(fit$results[2,])+1
+	kmeans(f, k)
+}
