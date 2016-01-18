@@ -1,4 +1,4 @@
-setwd("~/Research/clustspec")
+setwd("~/Downloads/clustspec")
 library(devtools)
 document()
 install(".")
