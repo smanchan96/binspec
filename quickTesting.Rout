@@ -1,6 +1,6 @@
 
-R version 3.0.2 (2013-09-25) -- "Frisbee Sailing"
-Copyright (C) 2013 The R Foundation for Statistical Computing
+R version 3.2.3 (2015-12-10) -- "Wooden Christmas-Tree"
+Copyright (C) 2015 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -17,5 +17,30 @@ Type 'q()' to quit R.
 
 > setwd("~/Downloads/clustspec")
 > library(devtools)
-Error in library(devtools) : there is no package called 'devtools'
+> document()
+Updating clustspec documentation
+Loading clustspec
+Writing getPrComps.Rd
+Writing persondf.Rd
+> install(".")
+Installing clustspec
+'/usr/lib/R/bin/R' --no-site-file --no-environ --no-save --no-restore CMD  \
+  INSTALL '/home/smanchan/Downloads/clustspec'  \
+  --library='/usr/local/lib/R/site-library' --install-tests 
+
+* installing *source* package 'clustspec' ...
+** R
+** preparing package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded
+* DONE (clustspec)
+Reloading installed clustspec
+> library(clustspec)
+> library(lattice)
+> samea <- persondf("Samea", 1:2, data.frame(1:50, 50:1), data.frame(1:50, 50:1))
+> otra <- persondf("Sameer", 1:2, data.frame(1:51, 51:1), data.frame(1:51, 51:1))
+> mmbd <- minMaxByDay(samea, otra)
+Error: could not find function "minMaxByDay"
 Execution halted
