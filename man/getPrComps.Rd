@@ -7,7 +7,7 @@
 getPrComps(spectrums)
 }
 \arguments{
-\item{spectrums}{nxm matrix representing frequencies for n individuals over m integer m/z values.}
+\item{spectrums}{nxd matrix with n vectors of d dimensions}
 }
 \description{
 Get principal components that explain 90% of variance.

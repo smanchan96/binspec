@@ -1,7 +1,7 @@
 #' getPrComps
 #'
 #' Get principal components that explain 90% of variance.
-#' @param spectrums nxm matrix representing frequencies for n individuals over m integer m/z values.
+#' @param spectrums nxd matrix with n vectors of d dimensions
 #' @export getPrComps
 #' @examples
 #' getPrComps()
@@ -22,17 +22,32 @@ getPrComps <- function(spectrums) {
 	return(result$x[,1:totake])
 }
 
-#' kmeansPCA
+#' kmeans CH
 #'
-#' Run getPrComps and k-means, using the k resulting in best CH value
-#' @param spectrums nxm matrix representing frequencies for n individuals over m integer m/z values.
-#' @export kmeansPCA
+#' Run k-means, using the k resulting in best CH value
+#' @param nxd matrix with n individuals and d dimensions
+#' @export kmeansCH
 #' @examples
-#' kmeansPCA()
-kmeansPCA <- function(spectrums) {
+#' kmeansCH()
+kmeansCH <- function(f) {
 	require(vegan)
-	f <- getPrComps(spectrums)
 	fit <- cascadeKM(f, 2, 6)
 	k <- which.max(fit$results[2,])+1
 	kmeans(f, k)
+}
+
+#' forestSelect
+#'
+#' Get top r features using data matrix and labels for data
+#' @param nxd matrix with n individuals and d dimensions
+#' @param vector of length n with integer labels
+#' @param number of features to select (r<d)
+#' @export forestSelect
+#' @examples
+#' forestSelect()
+forestSelect <- function(m, lbl, r) {
+  require(randomForest)
+  lbl <- as.factor(lbl)
+  myforest <- randomForest(m, lbl, importance = T)
+  head(sort(myforest$importance[,7], decreasing = T,)n=r)
 }

@@ -29,4 +29,4 @@ persondf.plot <- function(persondf){
   xyplot(persondf$freq~persondf$mz|sapply(persondf$days, function(x)paste("Day ", x)), xlab="m/z", ylab="Frequency", main=persondf$id[1])
 }
 
-
+# Use fread to read the csv files
