@@ -49,5 +49,39 @@ forestSelect <- function(m, lbl, r) {
   require(randomForest)
   lbl <- as.factor(lbl)
   myforest <- randomForest(m, lbl, importance = T)
-  head(sort(myforest$importance[,7], decreasing = T,)n=r)
+  head(sort(myforest$importance[,7], decreasing = T,), n=r)
+}
+
+#' randIndex
+#'
+#' Measure similarity of two clustering assignments
+#' @param vector of length n with integer labels
+#' @param vector of length n with integer labels
+#' @export randIndex
+#' @examples
+#' randIndex()
+randIndex <- function(oc, nc) {
+  a<-0
+  b<-0
+  c<-0
+  d<-0
+  for(i in 1:(length(oc)-1)){
+    for (j in (i+1):length(oc)) {
+      if (oc[i]==oc[j] & nc[i]==nc[j]) {
+        a <- a + 1
+      }
+      else if(oc[i]!=oc[j] & nc[i]!=nc[j]) {
+        b <- b + 1
+      }
+      else if(oc[i]==oc[j] & nc[i]!=nc[j]) {
+        c <- c + 1
+      }
+      else {
+        d <- d + 1
+      }
+    }
+  }
+  v <- c((a+b)/(a+b+c+d), a, b, c, d)
+  names(v) <- c("rand", "a", "b", "c", "d")
+  return(v)
 }

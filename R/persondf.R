@@ -9,8 +9,12 @@
 #' persondf()
 
 persondf <- function(id, dates, ...) {
-  mydf <- do.call(rbind, list(...))
-  lengths <- unlist(lapply(list(...), nrow))
+  p1  <- list(...)
+  for (x in 1:5) {
+    names(p1[[x]])<-c("m/z", "freq")
+  }
+  mydf <- do.call(rbind, p1)
+  lengths <- unlist(lapply(p1, nrow))
   names(mydf) = c("mz", "freq")
   mydf$ids <- rep(id, length(mydf$mz))
   mydf$days <- unlist(lapply(1:length(lengths), function(i) rep(dates[i], lengths[i])))
