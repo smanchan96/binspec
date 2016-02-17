@@ -78,11 +78,15 @@ colnames(cl) <- c(5,10,20,50,100,200,500)
 plot(strtoi(colnames(res)), res[1,], xlab="r", ylab="Rand Index", main="Features vs Rand Index")
 
 
-n <- max(unlist(lapply(cl, length)))
-for(i in 1:length(cl)) {
-  length(cl[[i]]) <- n
+if (is.list(cl)) {
+  n <<- max(unlist(lapply(cl, length)))
+  for(i in 1:length(cl)) {
+    length(cl[[i]]) <- n
+  }
+  newcl <<- do.call(cbind, cl)
+} else {
+  newcl <<- cl
 }
-newcl <- do.call(cbind, cl)
 m <- sort(table(km$cluster), decreasing = T)
 length(m) <- n
 barplot(t(cbind(m, newcl)), beside = T, xlab="Cluster", ylab="Member count", main="Cluster Size")
