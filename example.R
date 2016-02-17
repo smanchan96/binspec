@@ -54,24 +54,37 @@ vectors <- t(sapply(1:length(day0), function(x)c(day0[[x]], day1[[x]], day2[[x]]
 
 pcs <- getPrComps(vectors)
 km <- kmeansCH(pcs)
-fs <- forestSelect(vectors, km$cluster, 20)
-
-indices <- sapply(names(fs), strtoi)
-newvec <- vectors[,indices]
-newkm <- kmeansCH(newvec)
-
-ri <- randIndex(km$cluster, newkm$cluster)
+cl <- sapply(c(5, 10, 20, 50, 100, 200, 500), function(r) {
+  fs <- forestSelect(vectors, km$cluster, r)
+  indices <- sapply(names(fs), strtoi)
+  newvec <- vectors[,indices]
+  sort(table(kmeansCH(newvec)$cluster), decreasing = T)
+})
+res <- sapply(c(5, 10, 20, 50, 100, 200, 500), function(r) {
+  fs <- forestSelect(vectors, km$cluster, r)
+  indices <- sapply(names(fs), strtoi)
+  newvec <- vectors[,indices]
+  newkm <- kmeansCH(newvec)
+  randIndex(km$cluster, newkm$cluster)
+})
+colnames(res) <- c(5,10,20,50,100,200,500)
+colnames(cl) <- c(5,10,20,50,100,200,500)
 
 ################################################################
 #                                                              #
 # Visualization of results begins here                         #
 #                                                              #
 ################################################################
-m <- matrix(ri[-1], nrow = 2)
-colnames(m) <- c("Matches", "Not Matches")
-barplot(m, main="Rand Visualization", xlab="Matches", ylab = "Pairs inside", legend.text = rev(list("Similar Pair (in a or c)","Dissimilar Pair (in b or d)")))
+plot(strtoi(colnames(res)), res[1,], xlab="r", ylab="Rand Index", main="Features vs Rand Index")
 
-clustersize<-table(km$cluster)
-barplot(sort(clustersize, decreasing = T), xlab="Cluster", ylab = "Members", main = "Cluster size", names.arg = "")
-clustersize<-table(newkm$cluster)
-barplot(sort(clustersize, decreasing = T), xlab="Cluster", ylab = "Members", main = "Cluster size", names.arg = "")
+
+n <- max(unlist(lapply(cl, length)))
+for(i in 1:length(cl)) {
+  length(cl[[i]]) <- n
+}
+newcl <- do.call(cbind, cl)
+m <- sort(table(km$cluster), decreasing = T)
+length(m) <- n
+barplot(t(cbind(m, newcl)), beside = T, xlab="Cluster", ylab="Member count", main="Cluster Size")
+legend("topright", col=gray.colors(7), legend=c("C", "5", "10", "20", "50", "100", "200", "500"), cex=.6)
+

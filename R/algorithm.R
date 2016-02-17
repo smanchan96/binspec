@@ -49,7 +49,8 @@ forestSelect <- function(m, lbl, r) {
   require(randomForest)
   lbl <- as.factor(lbl)
   myforest <- randomForest(m, lbl, importance = T)
-  head(sort(myforest$importance[,7], decreasing = T,), n=r)
+  featureimport <- unlist(importance(myforest, type=1)[,1])
+  head(sort(featureimport, decreasing = T), n=r)
 }
 
 #' randIndex
