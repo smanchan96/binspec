@@ -44,7 +44,7 @@ day2<-adjustlist(day2)
 day3<-adjustlist(day3)
 day4<-adjustlist(day4)
 
-vectors <- t(sapply(1:length(day0), function(x)c(day0[[x]], day1[[x]], day2[[x]], day3[[x]], day4[[x]])))
+vectors <- do.call(cbind, list(do.call(rbind,day0),do.call(rbind,day1),do.call(rbind,day2),do.call(rbind,day3),do.call(rbind,day4)))
 
 ################################################################
 #                                                              #
@@ -54,6 +54,24 @@ vectors <- t(sapply(1:length(day0), function(x)c(day0[[x]], day1[[x]], day2[[x]]
 
 pcs <- getPrComps(vectors)
 km <- kmeansCH(pcs)
+fs <- forestSelect(vectors, km$cluster, 10)
+
+getmz <- function(index) {
+  freqs <- vectors[,index]
+  eachmz <- lapply(1:length(freqs), function(x) if (freqs[x]!= 0) {
+    persons[[x]][persons[[x]]$freq==freqs[x],]
+  } else return(NULL))
+  return(eachmz)
+  # newlst <- matrix(ncol=4)
+  # colnames(newlst) <- c("mz", "freq", "ids", "days")
+  # for (i in eachmz) {
+  #   if (!is.null(i) & nrow(i)!=0) {
+  #     newlst<-rbind(newlst, i)
+  #   }
+  # }
+  # c(names(sort(table(round(newlst$mz)), decreasing = T)[1]), names(sort(table(newlst$days))[1]))
+}
+
 cl <- sapply(c(5, 10, 20, 50, 100, 200, 500), function(r) {
   fs <- forestSelect(vectors, km$cluster, r)
   indices <- sapply(names(fs), strtoi)
@@ -86,9 +104,9 @@ if (is.list(cl)) {
   newcl <<- do.call(cbind, cl)
 } else {
   newcl <<- cl
+  n <<- ncol(newcl)
 }
 m <- sort(table(km$cluster), decreasing = T)
 length(m) <- n
-barplot(t(cbind(m, newcl)), beside = T, xlab="Cluster", ylab="Member count", main="Cluster Size")
-legend("topright", col=gray.colors(7), legend=c("C", "5", "10", "20", "50", "100", "200", "500"), cex=.6)
+barplot(t(cbind(m, newcl)), beside = T, xlab="Cluster", ylab="Member count", main="Cluster Size", names.arg = 1:nrow(cbind(m, newcl)), legend.text = c("C", "5", "10", "20", "50", "100", "200", "500"))
 
