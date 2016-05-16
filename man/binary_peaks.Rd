@@ -14,7 +14,7 @@ binary_peaks(df, neighbors, error = 0)
 \item{error}{m/z measuring error parameter}
 }
 \description{
-Find the intensity peaks
+Find binary peaks
 }
 \examples{
 binary_peaks()
