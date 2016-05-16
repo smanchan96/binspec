@@ -5,4 +5,4 @@ library(binspec)
 df <- data.frame(x=1:100, y=runif(100))
 df
 round_df(df)
-binary_peaks(df, 1, 0)
+binary_peaks(df, 1, .05)

@@ -32,9 +32,11 @@ binary_peaks <- function(df, neighbors, error=0) {
     #All the m/z values within the error of a peak should also be labled as peaks
     peakmzs <- df[[1]][peaks]
     #newpeaks are all o f
-    unlist(lapply(peakmzs, function(x) {
-                       floor(x - error * x):ceiling(x + error * x) 
+    toReturn <- unique(unlist(lapply(peakmzs, function(x) {
+                       round(x - error/2 * x):round(x + error/2 * x) 
 
-    }))
+})))
+    #remove items that are not in original m/z range (assumes df[[1]] sorted)
+    toReturn[toReturn >= df[[1]][1] & toReturn  <= df[[1]][nrow(df)]]
 }
 
