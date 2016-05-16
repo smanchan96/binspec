@@ -1,5 +1,5 @@
-Package: clustspec
-Title: Clustering and Feature Selection on Mass Spectra
+Package: binspec
+Title: Binary Classification on Mass Spectra
 Version: 0.0.0.9000
 Authors@R: person("Sameer", "Manchanda", email = "smanchan@purdue.edu", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
