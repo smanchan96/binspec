@@ -3,8 +3,6 @@
 #' Find the intensity peaks
 #' @param df Data frame
 #' @export round_df
-#' @examples
-#' integer_round_df()
 
 round_df <- function(df) {
     #Round each column to the nearest integer

@@ -12,7 +12,4 @@ round_df(df)
 \description{
 Find the intensity peaks
 }
-\examples{
-integer_round_df()
-}
 
