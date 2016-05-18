@@ -11,12 +11,9 @@ binary_peaks(df, neighbors, error = 0)
 
 \item{neighbors}{Number of neighboring m/z values to compare on right and left}
 
-\item{error}{m/z measuring error parameter}
+\item{error}{m/z Decimal error value}
 }
 \description{
-Find binary peaks
-}
-\examples{
-binary_peaks()
+Find peaks in window of size 2*neighbors + 1 and label m/z integers within the error as peaks.  Returns vector of peak m/z integers.
 }
 

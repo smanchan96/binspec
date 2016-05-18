@@ -10,6 +10,6 @@ round_df(df)
 \item{df}{Data frame}
 }
 \description{
-Find the intensity peaks
+Round all m/z and intensity values to integers.
 }
 
