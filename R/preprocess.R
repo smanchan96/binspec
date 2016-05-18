@@ -43,7 +43,11 @@ binary_peaks <- function(df, neighbors, error=0) {
 #' @export combine_peaks
 
 combine_peaks <- function(list_mz_peaks)  {
-    NULL
+    mzs <- sort(unique(unlist(list_mz_peaks)))
+    print(mzs)
+    do.call(rbind, lapply(list_mz_peaks, function(x) {
+                          mzs %in% x
+}))
 }
 
 #' Random Forest
@@ -80,6 +84,6 @@ ann_classify <- function(training_set, training_labels, test_set, test_labels) {
 #' @param test_labels
 #' @export svm_classify
 
-ann_classify <- function(training_set, training_labels, test_set, test_labels) {
+svm_classify <- function(training_set, training_labels, test_set, test_labels) {
     NULL
 }

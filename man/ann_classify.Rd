@@ -5,12 +5,8 @@
 \title{Artificial Neural Network}
 \usage{
 ann_classify(training_set, training_labels, test_set, test_labels)
-
-ann_classify(training_set, training_labels, test_set, test_labels)
 }
 \description{
 Build a ANN classifier and test it.
-
-Build a SVM classifier and test it.
 }
 
