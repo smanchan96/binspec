@@ -53,6 +53,11 @@ combine_peaks <- function(list_mz_peaks)  {
 #' @param training_labels
 #' @export random_forest_classify
 
+random_forest_classify <- function(training_set, training_labels) {
+    NULL
+}
+
+
 #' Artificial Neural Network
 #'
 #' Build a ANN classifier and test it.
@@ -61,6 +66,10 @@ combine_peaks <- function(list_mz_peaks)  {
 #' @param test_set
 #' @param test_labels
 #' @export ann_classify
+
+ann_classify <- function(training_set, training_labels, test_set, test_labels) {
+    NULL
+}
 
 #' Support Vector Machine
 #'
@@ -71,3 +80,6 @@ combine_peaks <- function(list_mz_peaks)  {
 #' @param test_labels
 #' @export svm_classify
 
+ann_classify <- function(training_set, training_labels, test_set, test_labels) {
+    NULL
+}
