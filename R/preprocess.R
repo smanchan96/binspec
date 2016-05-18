@@ -46,3 +46,28 @@ combine_peaks <- function(list_mz_peaks)  {
     NULL
 }
 
+#' Random Forest
+#'
+#' Build a random forest classifier and test it.  No need for test set because out-of-bag error measurement.
+#' @param training_set
+#' @param training_labels
+#' @export random_forest_classify
+
+#' Artificial Neural Network
+#'
+#' Build a ANN classifier and test it.
+#' @param training_set
+#' @param training_labels
+#' @param test_set
+#' @param test_labels
+#' @export ann_classify
+
+#' Support Vector Machine
+#'
+#' Build a SVM classifier and test it.
+#' @param training_set
+#' @param training_labels
+#' @param test_set
+#' @param test_labels
+#' @export svm_classify
+
