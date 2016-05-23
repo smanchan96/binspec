@@ -44,46 +44,28 @@ binary_peaks <- function(df, neighbors, error=0) {
 
 combine_peaks <- function(list_mz_peaks)  {
     mzs <- sort(unique(unlist(list_mz_peaks)))
-    print(mzs)
-    do.call(rbind, lapply(list_mz_peaks, function(x) {
+    mymatrix <- do.call(rbind, lapply(list_mz_peaks, function(x) {
                           mzs %in% x
 }))
+    colnames(mymatrix) <- mzs
+    mymatrix
 }
 
-#' Random Forest
+#' Classifier Accuracies
 #'
-#' Build a random forest classifier and test it.  No need for test set because out-of-bag error measurement.
-#' @param training_set
-#' @param training_labels
-#' @export random_forest_classify
+#' Find the best classifier using leave-one-out cross validation (svm) and out-of-bag error (random forests).  Returns a vector of classification accuracies
+#' @param peaks Boolean matrix of mass spectra rows with m/z columns, indicating if an m/z value corresponds to a peak.
+#' @param labels The correct classifications of the peaks.
+#' @param minpeaks How many "true" values must show up for a given m/z value for it to be considered a feature.
+#' @export classifier_accuracies
 
-random_forest_classify <- function(training_set, training_labels) {
-    NULL
-}
-
-
-#' Artificial Neural Network
-#'
-#' Build a ANN classifier and test it.
-#' @param training_set
-#' @param training_labels
-#' @param test_set
-#' @param test_labels
-#' @export ann_classify
-
-ann_classify <- function(training_set, training_labels, test_set, test_labels) {
-    NULL
-}
-
-#' Support Vector Machine
-#'
-#' Build a SVM classifier and test it.
-#' @param training_set
-#' @param training_labels
-#' @param test_set
-#' @param test_labels
-#' @export svm_classify
-
-svm_classify <- function(training_set, training_labels, test_set, test_labels) {
-    NULL
+classifier_accuracies <- function(peaks, labels, minpeaks) {
+  peaks <- peaks[,(apply(peaks, 2, sum)) > 50]
+  optsvm <- tune.svm(peaks, labels, kernel = "radial", cost = sapply(seq(-5, 15, by=2), function(x)2^x), gamma = sapply(seq(-15, 3, by=2), function(x)2^x), tunecontrol=tune.control(nrow(peaks)))
+  result <- svm(peaks, labels, kernel="radial", gamma=optsvm$best.parameters$gamma, cost=optsvm$best.parameters$cost, cross=nrow(peaks))
+  # resrf <- randomForest(peaks, labels, ntree = 1000, mtry = 9)
+  optimalRF <- tuneRF(peaks, labels, doBest = T)
+  toReturn <- c(sum(labels==optimalRF$predicted)/length(labels), sum(result$accuracies)/100/212)
+  names(toReturn) <- c("RF", "SVM")
+  toReturn
 }
