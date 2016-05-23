@@ -1,0 +1,6 @@
+setwd("/scratch/mentors/nkong/smanchan/Code/binspec/")
+four_rf <- read.table("four_rf.txt")
+four_svm <- read.table("four_svm.txt")
+room_rf <- read.table("room_rf.txt")
+room_svm <- read.table("room_svm.txt")
+mylist <- list(four_rf, four_svm, room_rf, room_svm)

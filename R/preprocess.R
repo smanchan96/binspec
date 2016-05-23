@@ -38,7 +38,7 @@ binary_peaks <- function(df, neighbors, error=0) {
 
 #' Combine peak vectors
 #'
-#' Create a binary matrix, each column represents and m/z value, and each row represents a mass spectra.  The value indicates whether or not the m/z of this spectra is a peak.
+#' Create a binary matrix, each column represents an m/z value, and each row represents a mass spectra.  The value indicates whether or not the m/z of this spectra is a peak.
 #' @param list_mz_peaks List of m/z peak vectors
 #' @export combine_peaks
 
@@ -60,12 +60,12 @@ combine_peaks <- function(list_mz_peaks)  {
 #' @export classifier_accuracies
 
 classifier_accuracies <- function(peaks, labels, minpeaks) {
-  peaks <- peaks[,(apply(peaks, 2, sum)) > 50]
+  peaks <- peaks[,(apply(peaks, 2, sum)) > minpeaks]
   optsvm <- tune.svm(peaks, labels, kernel = "radial", cost = sapply(seq(-5, 15, by=2), function(x)2^x), gamma = sapply(seq(-15, 3, by=2), function(x)2^x), tunecontrol=tune.control(nrow(peaks)))
   result <- svm(peaks, labels, kernel="radial", gamma=optsvm$best.parameters$gamma, cost=optsvm$best.parameters$cost, cross=nrow(peaks))
   # resrf <- randomForest(peaks, labels, ntree = 1000, mtry = 9)
   optimalRF <- tuneRF(peaks, labels, doBest = T)
-  toReturn <- c(sum(labels==optimalRF$predicted)/length(labels), sum(result$accuracies)/100/212)
+  toReturn <- c(sum(labels==optimalRF$predicted)/length(labels), sum(result$accuracies)/100/length(labels))
   names(toReturn) <- c("RF", "SVM")
   toReturn
 }

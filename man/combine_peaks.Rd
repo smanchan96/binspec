@@ -10,6 +10,6 @@ combine_peaks(list_mz_peaks)
 \item{list_mz_peaks}{List of m/z peak vectors}
 }
 \description{
-Create a binary matrix, each column represents and m/z value, and each row represents a mass spectra.  The value indicates whether or not the m/z of this spectra is a peak.
+Create a binary matrix, each column represents an m/z value, and each row represents a mass spectra.  The value indicates whether or not the m/z of this spectra is a peak.
 }
 
