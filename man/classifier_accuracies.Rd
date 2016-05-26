@@ -4,7 +4,7 @@
 \alias{classifier_accuracies}
 \title{Classifier Accuracies}
 \usage{
-classifier_accuracies(peaks, labels, minpeaks)
+classifier_accuracies(peaks, labels, min_peak_percentage)
 }
 \arguments{
 \item{peaks}{Boolean matrix of mass spectra rows with m/z columns, indicating if an m/z value corresponds to a peak.}
@@ -14,6 +14,6 @@ classifier_accuracies(peaks, labels, minpeaks)
 \item{minpeaks}{How many "true" values must show up for a given m/z value for it to be considered a feature.}
 }
 \description{
-Find the best classifier using leave-one-out cross validation (svm) and out-of-bag error (random forests).  Returns a vector of classification accuracies
+Find the best classifier using leave-one-out cross validation (svm) and out-of-bag error (random forests).  Returns a list of classifier results
 }
 

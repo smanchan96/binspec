@@ -53,19 +53,67 @@ combine_peaks <- function(list_mz_peaks)  {
 
 #' Classifier Accuracies
 #'
-#' Find the best classifier using leave-one-out cross validation (svm) and out-of-bag error (random forests).  Returns a vector of classification accuracies
+#' Find the best classifier using leave-one-out cross validation (svm) and out-of-bag error (random forests).  Returns a list of classifier results
 #' @param peaks Boolean matrix of mass spectra rows with m/z columns, indicating if an m/z value corresponds to a peak.
 #' @param labels The correct classifications of the peaks.
 #' @param minpeaks How many "true" values must show up for a given m/z value for it to be considered a feature.
 #' @export classifier_accuracies
 
-classifier_accuracies <- function(peaks, labels, minpeaks) {
-  peaks <- peaks[,(apply(peaks, 2, sum)) > minpeaks]
-  optsvm <- tune.svm(peaks, labels, kernel = "radial", cost = sapply(seq(-5, 15, by=2), function(x)2^x), gamma = sapply(seq(-15, 3, by=2), function(x)2^x), tunecontrol=tune.control(nrow(peaks)))
-  result <- svm(peaks, labels, kernel="radial", gamma=optsvm$best.parameters$gamma, cost=optsvm$best.parameters$cost, cross=nrow(peaks))
-  # resrf <- randomForest(peaks, labels, ntree = 1000, mtry = 9)
-  optimalRF <- tuneRF(peaks, labels, doBest = T)
-  toReturn <- c(sum(labels==optimalRF$predicted)/length(labels), sum(result$accuracies)/100/length(labels))
-  names(toReturn) <- c("RF", "SVM")
-  toReturn
+classifier_accuracies <- function(peaks, labels, min_peak_percentage) {
+    minpeaks <- floor(min_peak_percentage * length(labels))
+    peaks <- peaks[,(apply(peaks, 2, sum)) > minpeaks]
+    optsvm <- tune.svm(peaks, labels, kernel = "radial", cost = sapply(seq(-5, 15, by=2), function(x)2^x), gamma = sapply(seq(-15, 3, by=2), function(x)2^x), tunecontrol=tune.control(nrow(peaks)))
+    svm_result <- svm(peaks, labels, kernel="radial", gamma=optsvm$best.parameters$gamma, cost=optsvm$best.parameters$cost, cross=nrow(peaks))
+    optimalRF <- tuneRF(peaks, labels, doBest = T)
+    #toReturn <- c(sum(labels==optimalRF$predicted)/length(labels), sum(result$accuracies)/100/length(labels))
+    list(RF=optimalRF, SVM=svm_result)
+}
+
+#' SVM and RF Accuracies
+#' 
+#' Given a vector of neighbor values and a vector of the minimum number of peaks to be considered, this function finds the peak mz values for a data set by running binary_peaks using each of the neighbor vector values, runs SVM and RF on the peaks for each of the min_peak_count values, and returns the accuracies of each test in a table. The table's rows are the number of neighbors, and the columns are the min_peak_count values.
+#' @param list_of_dfs The first data frame of mz values and frequencies
+#' @param labels The labels of the two states the first data frame's values could be classified as
+#' @param neighbors A vector of the number of neighbors to be considered in the binary_peaks function
+#' @param min_peaks_count A vector of the minimum numbers of peaks to be considered in the classifier_accuracies function
+#' @export svm_rf
+
+svm_rf <- function(list_of_dfs, labels, neighbors, min_peaks_percentage) {
+    df_rf <- vector(mode="list", length=(length(neighbors) * length(min_peaks_count)))
+    df_svm <- vector(mode="list", length=(length(neighbors) * length(min_peaks_count)))
+
+    for (i in 1:length(neighbors)) {
+        #Finds peak mz values for every value in the neighbors vector
+        peaks <- lapply(list_of_dfs, function(x) binary_peaks(x, neighbors[i], .005))
+        #Creates table where columns are mass spectras and rows are peak mz values
+        cpeaks <- combine_peaks(peaks)
+
+        for (j in 1:length(min_peaks_count)) {
+            #Finds accuracies of SVM and RF using for each of the previously found peaks that are greater than the min_peak_count threshold
+            results <- classifier_accuracies(cpeaks, labels, min_peaks_count[j])
+            #Creates accuracy tables where the rows are the neighbors and the columns are the min_peak_counts; separates by RF and SVM
+            df_rf[[(i - 1) * length(min_peaks_count)+ j]] <- results[[1]]
+            df_svm[[(i - 1) * length(min_peaks_count)+ j]] <-results[[2]]
+            #Creates list of aforementioned accuracy tables with columns showing neighbors, min-peak_count and accuracies
+        }
+    }
+    names(df_rf) <- levels(interaction(as.character(min_peaks_count), as.character(neighbors)))
+    names(df_svm) <- levels(interaction(as.character(min_peaks_count), as.character(neighbors)))
+    list(RF=df_rf,SVM=df_svm)
+}
+
+#' Rank importance of features
+#' 
+#' Given a matrix of binary peaks and each row's corresponding labels, this function takes returns the absolute difference between the proportion of times an m/z value was labeled as a peak within each of the two classes.
+#' @param peaks A matrix of peaks
+#' @param labels A factor vector of labels whose length is equal to the number of rows of peaks
+#' @export naive_feature_importance
+
+naive_feature_importance <- function(peaks, labels) {
+    importance <- apply(peaks, 2, function(x) {
+                        tmp <- (tapply(x, room_labels, mean))
+                        abs(tmp[1]-tmp[2])
+    })
+    names(importance) <- colnames(peaks)
+    importance 
 }

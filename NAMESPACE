@@ -3,4 +3,6 @@
 export(binary_peaks)
 export(classifier_accuracies)
 export(combine_peaks)
+export(naive_feature_importance)
 export(round_df)
+export(svm_rf)
