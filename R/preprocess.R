@@ -117,3 +117,54 @@ naive_feature_importance <- function(peaks, labels) {
     names(importance) <- colnames(peaks)
     importance 
 }
+
+#' Plot importance of randomForest 
+#' 
+#' Plot importance of each m/z value according to a randomForest object.  Returns a ggplot object
+#' @param rf A randomForest object
+#' @export plot_rf_importance
+
+plotRFaccuracy <- function(rf) {
+  rf.importance <- rf$importance[,1]/max(rf$importance[,1])
+  importancedf <- data.frame(mz = as.numeric(names(rf.importance)), importance = rf.importance)
+  ggplot(importancedf, aes(mz, importance)) + geom_point() + ggtitle("Random Forest: m/z vs importance") + ylim(0, 1)
+}
+
+#' Plot importance of naive importance vector
+#' 
+#' Plot importance of each m/z value according to the naive ranking vector.  Returns a ggplot object
+#' @param naive_importance A vector returned from naive_feature_importance()
+#' @export plot_naive_importance
+
+plot_naive_importance <- function(naive_importance) {
+  importancedf <- data.frame(mz = as.numeric(names(naive_importance)), importance = naive_importance)
+  ggplot(importancedf, aes(mz, importance)) + geom_point() + ggtitle("Naive Rank: m/z vs importance") + ylim(0, 1)
+}
+
+#' Get frequency of peaks
+#' 
+#' Return frequency of peaks within each label
+#' @param peaks
+#' @param labels
+#' @export peak_frequencies
+
+peak_frequencies <- function(peaks, labels) {
+  apply(peaks, 2, function(x) tapply(x, labels, mean))
+}
+
+#' Plot important peaks on each day
+#' 
+#' Returns a ggplot object of the most important peak frequencies
+#' @param peaks_freqs The frequency of each peak within each label
+#' @param rf A random forest object, to be used for feature importance
+#' @param count Number of peaks to select
+#' @export plot_rf_differences
+
+plot_rf_differences <- function(peak_freqs, rf, count) {
+  mzs <- names(head(sort(rf$importance[,1], decreasing=T), count))
+  filteredData <- peak_difs[,colnames(peak_freqs) %in% mzs]
+  tmpdf <- melt(filteredData)
+  names(tmpdf) <- c("Label", "mz", "Peak_Frequency")
+  tmpdf$Label <- as.factor(tmpdf$Label)
+  ggplot(tmpdf, aes(mz, Peak_Frequency, color=Label)) + geom_point() + ggtitle("Most important m/z's vs Peak Frequency")
+}
