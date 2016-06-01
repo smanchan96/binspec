@@ -4,7 +4,8 @@
 \alias{svm_rf}
 \title{SVM and RF Accuracies}
 \usage{
-svm_rf(list_of_dfs, labels, neighbors, min_peaks_percentage)
+svm_rf(list_of_dfs, labels, neighbors, min_peaks_percentage,
+  error_window = 0.005)
 }
 \arguments{
 \item{list_of_dfs}{The first data frame of mz values and frequencies}
@@ -13,7 +14,9 @@ svm_rf(list_of_dfs, labels, neighbors, min_peaks_percentage)
 
 \item{neighbors}{A vector of the number of neighbors to be considered in the binary_peaks function}
 
-\item{min_peaks_count}{A vector of the minimum numbers of peaks to be considered in the classifier_accuracies function}
+\item{min_peaks_percentage}{A vector of the minimum percent of times an m/z must be a peak to be considered in the classifier_accuracies function}
+
+\item{errow_window}{A vector of percentage of nearby peaks that should be also labeled as peaks when one is found}
 }
 \description{
 Given a vector of neighbor values and a vector of the minimum number of peaks to be considered, this function finds the peak mz values for a data set by running binary_peaks using each of the neighbor vector values, runs SVM and RF on the peaks for each of the min_peak_count values, and returns the accuracies of each test in a table. The table's rows are the number of neighbors, and the columns are the min_peak_count values.

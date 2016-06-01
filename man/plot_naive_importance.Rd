@@ -4,7 +4,7 @@
 \alias{plot_naive_importance}
 \title{Plot importance of naive importance vector}
 \usage{
-plot_naive_importance(naive_importance)
+plot_naive_importance(naive_importance, count = 10)
 }
 \arguments{
 \item{naive_importance}{A vector returned from naive_feature_importance()}
