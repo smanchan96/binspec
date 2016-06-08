@@ -60,6 +60,8 @@ combine_peaks <- function(list_mz_peaks)  {
 #' @export classifier_accuracies
 
 classifier_accuracies <- function(peaks, labels, min_peak_percentage) {
+  require("e1071")
+  require("randomForest")
   minpeaks <- floor(min_peak_percentage * length(labels))
   peaks <- peaks[,(apply(peaks, 2, sum)) > minpeaks]
   optsvm <- tune.svm(peaks, labels, kernel = "radial", cost = sapply(seq(-5, 15, by=2), function(x)2^x), gamma = sapply(seq(-15, 3, by=2), function(x)2^x), tunecontrol=tune.control(nrow(peaks)))
@@ -80,30 +82,42 @@ classifier_accuracies <- function(peaks, labels, min_peak_percentage) {
 #' @export svm_rf
 
 svm_rf <- function(list_of_dfs, labels, neighbors, min_peaks_percentage, error_window=0.005) {
-  min_peaks_count <- min_peaks_percentage
-  df_rf <- vector(mode="list", length=(length(neighbors) * length(min_peaks_count) * length(error_window)))
-  df_svm <- vector(mode="list", length=(length(neighbors) * length(min_peaks_count) * length(error_window)))
-  for (k in 1:length(error_window)) {
-    for (i in 1:length(neighbors)) {
+  #require(foreach)
+  #require(parallel)
+  #require(doParallel)
+  #cl <- makeCluster(multiple_cores)
+  #registerDoParallel(cl, cores=multiple_cores)
+  #df_rf <- vector(mode="list", length=(length(neighbors) * length(min_peaks_percentage) * length(error_window)))
+  #df_svm <- vector(mode="list", length=(length(neighbors) * length(min_peaks_percentage) * length(error_window)))
+  toReturn <- vector(mode="list", length=(length(neighbors) * length(min_peaks_percentage) * length(error_window)))
+  #toReturn <- foreach (k=1:(length(error_window) * length(neighbors) * length(min_peaks_percentage)), .packages=c("e1071","randomForest")) %dopar% {
+  #for (k in 1:(length(error_window) * length(neighbors) * length(min_peaks_percentage))) {
+    #error_index <- ceiling(k / (length(neighbors) * length(min_peaks_percentage)))
+  for (error_index in 1:length(error_window)) {
+    for (neighbor_index in 1:length(neighbors)) {
+      #neighbor_index <- ceiling(k / length(min_peaks_percentage)) %% length(neighbors)
+      #if (neighbor_index == 0) {
+      #  neighbor_index <- length(neighbors)
+      #}
+
       #Finds peak mz values for every value in the neighbors vector
-      peaks <- lapply(list_of_dfs, function(x) binary_peaks(x, neighbors[i], error_window[k]))
+      peaks <- lapply(list_of_dfs, function(x) binary_peaks(x, neighbors[neighbor_index], error_window[error_index]))
       #Creates table where columns are mass spectras and rows are peak mz values
       cpeaks <- combine_peaks(peaks)
-      
-      for (j in 1:length(min_peaks_count)) {
+      for (min_peaks_index in 1:length(min_peaks_percentage)) {
+        #min_peaks_index <- k %% length(min_peaks_percentage)
+        #if (min_peaks_index == 0) {
+        #  min_peaks_index <- min_peaks_percentage
+        #}
+
         #Finds accuracies of SVM and RF using for each of the previously found peaks that are greater than the min_peak_count threshold
-        results <- classifier_accuracies(cpeaks, labels, min_peaks_count[j])
-        #Creates accuracy tables where the rows are the neighbors and the columns are the min_peak_counts; separates by RF and SVM
-        df_rf[[(k - 1) * length(min_peaks_count) * length(neighbors) + (i - 1) * length(min_peaks_count) + j]] <- results[[1]]
-        df_svm[[(i - 1) * length(min_peaks_count)+ j]] <-results[[2]]
-        #Creates list of aforementioned accuracy tables with columns showing neighbors, min-peak_count and accuracies
+        results <- classifier_accuracies(cpeaks, labels, min_peaks_percentage[min_peaks_index])
+        toReturn[[(error_index-1)*length(neighbors)*length(min_peaks_percentage)+(neighbor_index-1)*length(min_peaks_percentage)+min_peaks_index]] <- list(RF=results[[1]], SVM=results[[2]], error_window=error_window[error_index], neighbors=neighbors[neighbor_index], min_peaks_freq=min_peaks_percentage[min_peaks_index])
       }
     }
   }
-  names(df_rf) <- levels(interaction(as.character(error_window), as.character(min_peaks_count), as.character(neighbors)))
-  names(df_svm) <- levels(interaction(as.character(error_window), as.character(min_peaks_count), as.character(neighbors)))
-  list(RF=df_rf,SVM=df_svm)
-  
+  #stopCluster(cl)
+  toReturn
 }
 
 #' Rank importance of features
@@ -115,8 +129,8 @@ svm_rf <- function(list_of_dfs, labels, neighbors, min_peaks_percentage, error_w
 
 naive_feature_importance <- function(peaks, labels) {
   importance <- apply(peaks, 2, function(x) {
-    tmp <- (tapply(x, room_labels, mean))
-    abs(tmp[1]-tmp[2])
+                      tmp <- (tapply(x, room_labels, mean))
+                      abs(tmp[1]-tmp[2])
   })
   names(importance) <- colnames(peaks)
   importance 
