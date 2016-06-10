@@ -143,7 +143,7 @@ naive_feature_importance <- function(peaks, labels) {
 #' @export plot_rf_importance
 
 plot_rf_importance<- function(rf, count) {
-  rf.importance <- rf$importance[,1]/max(rf$importance[,1])
+  rf.importance <- rf$importance[,1]
   importancedf <- data.frame(mz = as.numeric(names(rf.importance)), importance = rf.importance)
   list(ggplot(importancedf, aes(mz, importance)) + geom_point() + ggtitle("Random Forest: m/z vs importance") + ylim(0, 1), head(sort(rf.importance, decreasing=T), n=count))
 }
