@@ -5,7 +5,8 @@
 \title{SVM and RF Accuracies}
 \usage{
 svm_rf(list_of_dfs, labels, neighbors, min_peaks_percentage,
-  error_window = 0.005)
+  error_window = 0.005, training = 1:length(list_of_dfs),
+  multiple_cores = 1)
 }
 \arguments{
 \item{list_of_dfs}{The first data frame of mz values and frequencies}
@@ -15,6 +16,10 @@ svm_rf(list_of_dfs, labels, neighbors, min_peaks_percentage,
 \item{neighbors}{A vector of the number of neighbors to be considered in the binary_peaks function}
 
 \item{min_peaks_percentage}{A vector of the minimum percent of times an m/z must be a peak to be considered in the classifier_accuracies function}
+
+\item{training}{Vector of the data frames to be used for training}
+
+\item{multiple_cores}{Number of cores to use}
 
 \item{errow_window}{A vector of percentage of nearby peaks that should be also labeled as peaks when one is found}
 }

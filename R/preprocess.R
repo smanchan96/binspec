@@ -56,15 +56,18 @@ combine_peaks <- function(list_mz_peaks)  {
 #' Find the best classifier using leave-one-out cross validation (svm) and out-of-bag error (random forests).  Returns a list of classifier results
 #' @param peaks Boolean matrix of mass spectra rows with m/z columns, indicating if an m/z value corresponds to a peak.
 #' @param labels The correct classifications of the peaks.
+#' @param training The rows to actually use to train
 #' @param minpeaks How many "true" values must show up for a given m/z value for it to be considered a feature.
 #' @export classifier_accuracies
 
-classifier_accuracies <- function(peaks, labels, min_peak_percentage) {
+classifier_accuracies <- function(peaks, labels, training, min_peak_percentage) {
   require("e1071")
   require("randomForest")
   minpeaks <- floor(min_peak_percentage * length(labels))
   peaks <- peaks[,(apply(peaks, 2, sum)) > minpeaks]
-  optsvm <- tune.svm(peaks, labels, kernel = "radial", cost = sapply(seq(-5, 15, by=2), function(x)2^x), gamma = sapply(seq(-15, 3, by=2), function(x)2^x), tunecontrol=tune.control(nrow(peaks)))
+  peaks <- peaks[training,]
+  labels <- labels[training]
+  optsvm <- tune.svm(peaks, labels, kernel = "radial", cost = sapply(seq(-5, 5, by=2), function(x)2^x), gamma = sapply(seq(-9, 3, by=2), function(x)2^x), tunecontrol=tune.control(nrow(peaks)))
   svm_result <- svm(peaks, labels, kernel="radial", gamma=optsvm$best.parameters$gamma, cost=optsvm$best.parameters$cost, cross=nrow(peaks))
   optimalRF <- tuneRF(peaks, labels, doBest = T)
   #toReturn <- c(sum(labels==optimalRF$predicted)/length(labels), sum(result$accuracies)/100/length(labels))
@@ -79,45 +82,35 @@ classifier_accuracies <- function(peaks, labels, min_peak_percentage) {
 #' @param neighbors A vector of the number of neighbors to be considered in the binary_peaks function
 #' @param min_peaks_percentage A vector of the minimum percent of times an m/z must be a peak to be considered in the classifier_accuracies function
 #' @param errow_window A vector of percentage of nearby peaks that should be also labeled as peaks when one is found
+#' @param training Vector of the data frames to be used for training
+#' @param multiple_cores Number of cores to use
 #' @export svm_rf
 
-svm_rf <- function(list_of_dfs, labels, neighbors, min_peaks_percentage, error_window=0.005) {
-  #require(foreach)
-  #require(parallel)
-  #require(doParallel)
-  #cl <- makeCluster(multiple_cores)
-  #registerDoParallel(cl, cores=multiple_cores)
-  #df_rf <- vector(mode="list", length=(length(neighbors) * length(min_peaks_percentage) * length(error_window)))
-  #df_svm <- vector(mode="list", length=(length(neighbors) * length(min_peaks_percentage) * length(error_window)))
+svm_rf <- function(list_of_dfs, labels, neighbors, min_peaks_percentage, error_window=0.005, training=1:length(list_of_dfs), multiple_cores=1) {
+  require(parallel)
+  cl <- makeCluster(mc <- getOption("cl.cores", multiple_cores))
   toReturn <- vector(mode="list", length=(length(neighbors) * length(min_peaks_percentage) * length(error_window)))
-  #toReturn <- foreach (k=1:(length(error_window) * length(neighbors) * length(min_peaks_percentage)), .packages=c("e1071","randomForest")) %dopar% {
-  #for (k in 1:(length(error_window) * length(neighbors) * length(min_peaks_percentage))) {
-    #error_index <- ceiling(k / (length(neighbors) * length(min_peaks_percentage)))
-  for (error_index in 1:length(error_window)) {
-    for (neighbor_index in 1:length(neighbors)) {
-      #neighbor_index <- ceiling(k / length(min_peaks_percentage)) %% length(neighbors)
-      #if (neighbor_index == 0) {
-      #  neighbor_index <- length(neighbors)
-      #}
-
-      #Finds peak mz values for every value in the neighbors vector
-      peaks <- lapply(list_of_dfs, function(x) binary_peaks(x, neighbors[neighbor_index], error_window[error_index]))
-      #Creates table where columns are mass spectras and rows are peak mz values
-      cpeaks <- combine_peaks(peaks)
-      for (min_peaks_index in 1:length(min_peaks_percentage)) {
-        #min_peaks_index <- k %% length(min_peaks_percentage)
-        #if (min_peaks_index == 0) {
-        #  min_peaks_index <- min_peaks_percentage
-        #}
-
-        #Finds accuracies of SVM and RF using for each of the previously found peaks that are greater than the min_peak_count threshold
-        results <- classifier_accuracies(cpeaks, labels, min_peaks_percentage[min_peaks_index])
-        toReturn[[(error_index-1)*length(neighbors)*length(min_peaks_percentage)+(neighbor_index-1)*length(min_peaks_percentage)+min_peaks_index]] <- list(RF=results[[1]], SVM=results[[2]], error_window=error_window[error_index], neighbors=neighbors[neighbor_index], min_peaks_freq=min_peaks_percentage[min_peaks_index])
-      }
-    }
+  cartprod <- expand.grid(neighbors, min_peaks_percentage, error_window)
+  for (i in 1:length(toReturn)) {
+          toReturn[[i]] <- list(lst=list_of_dfs, lbl=labels, trn=training, indices=cartprod[i,])
   }
-  #stopCluster(cl)
-  toReturn
+  newReturn <- parLapply(cl, toReturn,
+  #newReturn <- lapply(head(toReturn),
+         function(x) {
+           neighbor_index <- x$indices[,1]
+           min_peaks_index <- x$indices[,2]
+           error_index <- x$indices[,3]
+           peaks <- lapply(x$lst, function(y) binary_peaks(y, neighbor_index, error_index))
+           #Creates table where columns are mass spectras and rows are peak mz values
+           cpeaks <- combine_peaks(peaks)
+           #trainset <- cpeaks[training,]
+           #trainlabels <- x$lbl[training]
+           results <- classifier_accuracies(cpeaks, labels, training, min_peaks_index)
+           list(RF=results[[1]], SVM=results[[2]], error_window=error_index, neighbors=neighbor_index, min_peaks_freq=min_peaks_index)
+         }
+         )
+  stopCluster(cl)
+  newReturn
 }
 
 #' Rank importance of features
@@ -129,7 +122,7 @@ svm_rf <- function(list_of_dfs, labels, neighbors, min_peaks_percentage, error_w
 
 naive_feature_importance <- function(peaks, labels) {
   importance <- apply(peaks, 2, function(x) {
-                      tmp <- (tapply(x, room_labels, mean))
+                      tmp <- (tapply(x, labels, mean))
                       abs(tmp[1]-tmp[2])
   })
   names(importance) <- colnames(peaks)
@@ -145,7 +138,7 @@ naive_feature_importance <- function(peaks, labels) {
 plot_rf_importance<- function(rf, count) {
   rf.importance <- rf$importance[,1]
   importancedf <- data.frame(mz = as.numeric(names(rf.importance)), importance = rf.importance)
-  list(ggplot(importancedf, aes(mz, importance)) + geom_point() + ggtitle("Random Forest: m/z vs importance") + ylim(0, 1), head(sort(rf.importance, decreasing=T), n=count))
+  list(ggplot(importancedf, aes(mz, importance)) + geom_point() + ggtitle("Random Forest: m/z vs importance"), head(sort(rf.importance, decreasing=T), n=count))
 }
 
 #' Plot importance of naive importance vector

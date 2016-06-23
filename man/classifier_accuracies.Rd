@@ -4,12 +4,14 @@
 \alias{classifier_accuracies}
 \title{Classifier Accuracies}
 \usage{
-classifier_accuracies(peaks, labels, min_peak_percentage)
+classifier_accuracies(peaks, labels, training, min_peak_percentage)
 }
 \arguments{
 \item{peaks}{Boolean matrix of mass spectra rows with m/z columns, indicating if an m/z value corresponds to a peak.}
 
 \item{labels}{The correct classifications of the peaks.}
+
+\item{training}{The rows to actually use to train}
 
 \item{minpeaks}{How many "true" values must show up for a given m/z value for it to be considered a feature.}
 }
