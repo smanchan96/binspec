@@ -4,4 +4,4 @@ A preprocessing/peak identification, classification, and feature ranking R libra
 git clone https://github.com/smanchan96/binspec.git
 ./build.sh
 ```
-Additional dependencies may be necessary.  Documentation is available [here.](https://github.com/smanchan96/binspec/blob/master/binspec.pdf)
+Additional dependencies may be necessary.  Documentation is available [here](https://github.com/smanchan96/binspec/blob/master/binspec.pdf) and will automatically be available in your R console after installation, using `?function-name`.
