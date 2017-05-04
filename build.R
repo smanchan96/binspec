@@ -1,5 +1,5 @@
 library(devtools)
-library(roxygen2)
-document()
+#library(roxygen2)
+#document()
 setwd("..")
 install("binspec")
