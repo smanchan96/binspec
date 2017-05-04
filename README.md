@@ -22,4 +22,4 @@ Then you can get started in the R console by running
 library(binspec)
 ```
 
-Documentation is available [here](https://github.com/smanchan96/binspec/blob/master/binspec.pdf) and will automatically be available in your R console after installation, using `?function-name`.
+Documentation is available [here](https://github.com/smanchan96/binspec/blob/master/binspec.pdf) and will automatically be available in your R console after installation, using `?function-name`.  An rough example of us using this package is in example.R.  Of course, it will not run without the mass spec data, but it is an okay template for figuring out how to use the packages.
